@@ -86,6 +86,8 @@ int main(int argc, char *argv[]) {
 
 void handleTCPClient(int clntSocket) {
 	char buffer[BUFSIZ];					// Buffer for echo string
+	char sendMsg[] = "Hello, world!\n";			// Echo this message
+	int sendMsgLen = strlen(sendMsg);
 	
 	// Receive message from client
 	ssize_t numBytesRcvd = recv(clntSocket, buffer, BUFSIZ, 0);
@@ -96,15 +98,20 @@ void handleTCPClient(int clntSocket) {
 
 	// Sent received string and receive again unil end of stream
 	while (numBytesRcvd > 0) {
-		ssize_t numBytesSent = send(clntSocket, buffer, numBytesRcvd, 0);
-		if (numBytesSent < 0) {
+		//ssize_t numBytesSent = send(clntSocket, buffer, numBytesRcvd, 0);
+		ssize_t sendBytes = send(clntSocket, sendMsg, sendMsgLen, 0);
+		if (sendBytes < 0) {
 			printf("send() failed\n");
 			exit(EXIT_FAILURE);
 		}
-		else if (numBytesSent != numBytesRcvd) {
-			printf("send() error: numBytesSent != numBytesRcvd\n");
-			exit(EXIT_FAILURE);
-		}
+		//if (numBytesSent < 0) {
+		//	printf("send() failed\n");
+		//	exit(EXIT_FAILURE);
+		//}
+		//else if (numBytesSent != numBytesRcvd) {
+		//	printf("send() error: numBytesSent != numBytesRcvd\n");
+		//	exit(EXIT_FAILURE);
+		//}
 
 		numBytesRcvd = recv(clntSocket, buffer, BUFSIZ, 0);
 		if (numBytesRcvd < 0) {
