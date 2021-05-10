@@ -101,18 +101,6 @@ void recvMessage(int clntSocket) {
 		fputs("Client: ", stdout);
 	fputs(bufRecv, stdout);
 
-	while (numBytesRcvd > 0) {
-		numBytesRcvd = recv(clntSocket, bufRecv, BUFSIZ, 0);
-		if (numBytesRcvd < 0) {
-			printf("recv() failed\n");
-			exit(EXIT_FAILURE);	
-		}
-
-		if (numBytesRcvd > 0) 
-			printf("Client: ");
-		fputs(bufRecv, stdout);
-	}
-
 	close(clntSocket);
 }
 
@@ -120,8 +108,7 @@ void sendMessage(int clntSocket) {
 	char bufSend[BUFSIZ];
 
 	// Send message to client
-	if (strlen(bufSend))
-		printf("Server: ");
+	printf("Server: ");
 	fgets(bufSend, BUFSIZ, stdin);
 
 	ssize_t numBytesSent = send(clntSocket, bufSend, BUFSIZ, 0);
