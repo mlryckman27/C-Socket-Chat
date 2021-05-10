@@ -13,6 +13,8 @@
 #include <arpa/inet.h>
 
 
+void recvMessage(int clntSocket);
+void sentMessage(int clntSocket);
 void handleTCPClient(int clntSocket);
 
 
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
 		else
 			puts("Unable to get client address");
 
-		handleTCPClient(clntSock);
+		recvMessage(clntSock);
 
 		// close the client connection with close() once the client is done (done by handleTCPCleint())
 
@@ -81,6 +83,36 @@ int main(int argc, char *argv[]) {
 
 
 	return 0;
+}
+
+
+void recvMessage(int clntSocket) {
+	char bufRecv[BUFSIZ];
+
+	// Receive message from client
+	ssize_t numBytesRcvd = recv(clntSocket, bufRecv, BUFSIZ, 0);
+	if (numBytesRcvd < 0) {
+		printf("recv() failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+	fputs(bufRecv, stdout);
+
+	while (numBytesRcvd > 0) {
+		numBytesRcvd = recv(clntSocket, bufRecv, BUFSIZ, 0);
+		if (numBytesRcvd < 0) {
+			printf("recv() failed\n");
+			exit(EXIT_FAILURE);	
+		}
+
+		fputs(bufRecv, stdout);
+	}
+
+	close(clntSocket);
+}
+
+void sendMessage(int clntSock) {
+	printf("Test message...\n");
 }
 
 
