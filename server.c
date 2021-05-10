@@ -14,7 +14,7 @@
 
 
 void recvMessage(int clntSocket);
-void sentMessage(int clntSocket);
+void sendMessage(int clntSocket);
 void handleTCPClient(int clntSocket);
 
 
@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
 			puts("Unable to get client address");
 
 		recvMessage(clntSock);
+		sendMessage(clntSock);
 
 		// close the client connection with close() once the client is done (done by handleTCPCleint())
 
@@ -95,7 +96,9 @@ void recvMessage(int clntSocket) {
 		printf("recv() failed\n");
 		exit(EXIT_FAILURE);
 	}
-
+	
+	if (numBytesRcvd > 0)
+		fputs("Client: ", stdout);
 	fputs(bufRecv, stdout);
 
 	while (numBytesRcvd > 0) {
@@ -105,14 +108,29 @@ void recvMessage(int clntSocket) {
 			exit(EXIT_FAILURE);	
 		}
 
+		if (numBytesRcvd > 0) 
+			printf("Client: ");
 		fputs(bufRecv, stdout);
 	}
 
 	close(clntSocket);
 }
 
-void sendMessage(int clntSock) {
-	printf("Test message...\n");
+void sendMessage(int clntSocket) {
+	char bufSend[BUFSIZ];
+
+	// Send message to client
+	if (strlen(bufSend))
+		printf("Server: ");
+	fgets(bufSend, BUFSIZ, stdin);
+
+	ssize_t numBytesSent = send(clntSocket, bufSend, BUFSIZ, 0);
+	if (numBytesSent < 0) {
+		printf("send() failed\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	close(clntSocket);
 }
 
 

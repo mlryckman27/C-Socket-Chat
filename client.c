@@ -7,10 +7,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 
-int main() {
+void recvMessage(int servSocket);
+void sendMessage(int servSocket);
+
+
+int main(int argc, char *argv[]) {
 
 
 	return 0;
 }
+
+
+void recvMessage(int servSocket) {
+
+}
+
+void sendMessage(int servSocket) {
+
+}
+
