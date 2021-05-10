@@ -81,6 +81,9 @@ void recvMessage(int sck) {
 		printf("recv() failed\n");
 		exit(EXIT_FAILURE);
 	}
+	
+	printf("Server: ");
+	fputs(buffer, stdout);
 
 	while (numBytesRcvd > 0) {
 		numBytesRcvd = recv(sck, buffer, BUFSIZ, 0);
@@ -88,6 +91,9 @@ void recvMessage(int sck) {
 			printf("recv() failed\n");
 			exit(EXIT_FAILURE);
 		}
+
+		printf("Server: ");
+		fputs(buffer, stdout);
 	}
 
 	close(sck);
