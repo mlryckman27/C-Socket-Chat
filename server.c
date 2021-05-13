@@ -11,18 +11,35 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <select.h>
+
+
+#define		MEM_NAME_LEN		8
+#define		MEM_PASS_LEN		8
+
+
+// Chat member structure
+struct member {
+	char name[MEM_NAME_LEN];		// Name of chat member
+	char password[MEM_PASS_LEN];		// Password for specific chat member
+	int loggedIn;				// 1 if name/password verified; 0 otherwise
+};
 
 
 void recvMessage(int clntSocket);
-void sendMessage(int clntSocket);
-void handleTCPClient(int clntSocket);
+void loginMember(int clntSocket, struct member *chatMember);
 
 
 int main(int argc, char *argv[]) {
 	// TODO: create separate header file for error handling 
 	// 	 functions to replace printf() statements in main()
-	
+
+
+	struct member admin;
+	strcpy(admin.name, "Matt");
+	strcpy(admin.password, "Blue****");
+	admin.loggedIn = 0;
+
+
 	// Check for correct number of arguments
 	if (argc != 2) {
 		printf("Wrong number of arguments\n");
@@ -56,6 +73,16 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	int login = 0;
+	while (!login) {
+		struct sockaddr_in clntAddr;
+		socklen_t clntAddrLen = sizeof(clntAddr);
+		int clntSock = accept(servSock, (struct sockaddr *) &clntAddr, &clntAddrLen);
+
+		loginMember(clntSock, &admin);
+		//close(clntSock);
+	}
+
 	// Loop forever
 	for (;;) {
 		struct sockaddr_in clntAddr;			// Client address
@@ -76,9 +103,6 @@ int main(int argc, char *argv[]) {
 			puts("Unable to get client address");
 
 		recvMessage(clntSock);
-		sendMessage(clntSock);
-
-		// close the client connection with close() once the client is done (done by handleTCPCleint())
 
 	}
 
@@ -105,18 +129,42 @@ void recvMessage(int clntSocket) {
 	close(clntSocket);
 }
 
-void sendMessage(int clntSocket) {
-	char bufSend[BUFSIZ];
+void loginMember(int clntSocket, struct member *chatMember) {
+	char nameLoginMessage[] = "Enter user name: ";
+	//char passLoginMessage[] = "Enter password: ";
+	int nameLoginMessageLen = strlen(nameLoginMessage);
+	//int passLoginMessageLen = strlen(passLoginMessage);
 
-	// Send message to client
-	printf("Server: ");
-	fgets(bufSend, BUFSIZ, stdin);
+	char nameLogin[MEM_NAME_LEN];
+	//char passLogin[MEM_PASS_LEN];
 
-	ssize_t numBytesSent = send(clntSocket, bufSend, BUFSIZ, 0);
+	ssize_t numBytesSent = send(clntSocket, nameLoginMessage, nameLoginMessageLen, 0);
 	if (numBytesSent < 0) {
 		printf("send() failed\n");
 		exit(EXIT_FAILURE);
-	}	
+	}
 
-	close(clntSocket);
+	ssize_t numBytesRcvd = recv(clntSocket, nameLogin, MEM_NAME_LEN, 0);
+	if (numBytesRcvd < 0) {
+		printf("recv() failed\n");
+		exit(EXIT_FAILURE);
+	}
+	else {
+		nameLogin[strcspn(nameLogin, "\n")] = '\0';	
+		printf("%s\n", nameLogin);
+		printf("%s\n", chatMember->name);
+	}
+
+	if (strcmp(nameLogin, chatMember->name) == 0) {
+		ssize_t loginReply = send(clntSocket, "User name matches database.\n", BUFSIZ, 0);
+		if (loginReply < 0) {
+			printf("send() failed\n");
+			exit(EXIT_FAILURE);
+		}
+
+		chatMember->loggedIn = 1;
+	}
+	else {
+		ssize_t loginReply = send(clntSocket, "No user found by that name in the database.\n", BUFSIZ, 0);
+	}
 }
